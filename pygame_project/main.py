@@ -2,9 +2,15 @@ import pygame, os, sys, sqlite3, csv
 from random import choice
 
 
+pygame.init()
+size = width, height = 999, 558
+screen = pygame.display.set_mode(size)
+
+
 COLORS = [(244, 164, 96), (255, 160, 122), (221, 160, 221), (107, 142, 35), (65, 105, 225)]
 
 COLOR = choice(COLORS)
+FPS = 90
 MENU = True
 PROFILE = False
 LEVELS = False
@@ -15,6 +21,7 @@ INPUT_PASSWORD = False
 REGISTRATION = False
 TEXT_LOGIN = ""
 TEXT_PASSWORD = ""
+LVL = 1
 
 
 def load_image(name, colorkey=None):
@@ -83,13 +90,44 @@ class game:
     def __init__(self, level, width=999, height=558):
         self.background = load_image("background_" + str(level) + ".jpg")
         self.background_rect = self.background.get_rect(bottomright=(width, height))
-
-        self.render()
-
-    def render(self):
-        screen.fill((0, 0, 0))
-
         screen.blit(self.background, self.background_rect)
+        all_sprites.draw(screen)
+
+
+class Bird(pygame.sprite.Sprite):
+    image = load_image("bird.png")
+    def __init__(self, *group):
+        super().__init__(*group)
+        self.image = Bird.image
+        self.rect = self.image.get_rect()
+        self.rect.x = 200
+        self.rect.y = 200
+
+    def update(self, tap=-1):
+        global LVL
+
+        if tap != -1 and bird.rect.top >= 25:
+            self.rect.y -= 35
+        elif tap != -1:
+            self.rect.y -= bird.rect.top
+
+        if LVL == 1:
+            if bird.rect.bottom >= 557 and tap == -1:
+                pass
+            else:
+                self.rect.y += 3
+
+        elif LVL == 2:
+            if bird.rect.bottom >= 557 and tap == -1:
+                pass
+            else:
+                self.rect.y += 2
+
+        elif LVL == 3:
+            if bird.rect.bottom >= 557 and tap == -1:
+                pass
+            else:
+                self.rect.y += 4
 
 
 class levels:
@@ -124,7 +162,7 @@ class levels:
         screen.blit(text, (21, 13))
 
     def changes(self, pos):
-        global MENU, LEVELS, PROFILE, GAME
+        global MENU, LEVELS, PROFILE, GAME, LVL
         x, y = pos[0], pos[1]
         if x < 55 and y < 55:
             LEVELS = False
@@ -134,18 +172,20 @@ class levels:
         elif x < 333:
             LEVELS = False
             GAME = True
+            LVL = 1
             game(1)
 
         elif x > 333 and x < 666:
             LEVELS = False
             GAME = True
+            LVL = 2
             game(2)
 
         elif x > 666:
             LEVELS = False
             GAME = True
+            LVL = 3
             game(3)
-
 
 
 class profile:
@@ -411,9 +451,9 @@ class profile:
 
 
 if __name__ == "__main__":
-    pygame.init()
-    size = width, height = 999, 558
-    screen = pygame.display.set_mode(size)
+    clock = pygame.time.Clock()
+    all_sprites = pygame.sprite.Group()
+    bird = Bird(all_sprites)
     running = True
     menu(screen)
     while running:
@@ -437,6 +477,19 @@ if __name__ == "__main__":
                 if (INPUT_PASSWORD or INPUT_LOGIN) and event.type == pygame.KEYDOWN:
                     profile.inputting(screen, INPUT_LOGIN, INPUT_PASSWORD)
 
+            elif GAME:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        all_sprites.update(0)
+                        game(LVL)
+
+        if GAME:
+            all_sprites.update()
+            game(LVL)
+
+
+
         pygame.display.flip()
+        clock.tick(FPS)
 
     pygame.quit()
