@@ -1,4 +1,4 @@
-import pygame, os, sys, sqlite3, csv
+import pygame, os, sys, random, csv
 from random import choice
 
 
@@ -10,7 +10,7 @@ screen = pygame.display.set_mode(size)
 COLORS = [(244, 164, 96), (255, 160, 122), (221, 160, 221), (107, 142, 35), (65, 105, 225)]
 
 COLOR = choice(COLORS)
-FPS = 90
+FPS = 30
 MENU = True
 PROFILE = False
 LEVELS = False
@@ -22,6 +22,7 @@ REGISTRATION = False
 TEXT_LOGIN = ""
 TEXT_PASSWORD = ""
 LVL = 1
+SCORE = 0
 
 
 def load_image(name, colorkey=None):
@@ -91,7 +92,9 @@ class game:
         self.background = load_image("background_" + str(level) + ".jpg")
         self.background_rect = self.background.get_rect(bottomright=(width, height))
         screen.blit(self.background, self.background_rect)
-        all_sprites.draw(screen)
+        bird_sprites.draw(screen)
+        pipe_up_sprites.draw(screen)
+        pipe_down_sprites.draw(screen)
 
 
 class Bird(pygame.sprite.Sprite):
@@ -105,6 +108,9 @@ class Bird(pygame.sprite.Sprite):
 
     def update(self, tap=-1):
         global LVL
+        print(pygame.sprite.collide_mask(self, pipe_down))
+        if pygame.sprite.collide_mask(self, pipe_down):
+            print(1)
 
         if tap != -1 and bird.rect.top >= 25:
             self.rect.y -= 35
@@ -121,13 +127,41 @@ class Bird(pygame.sprite.Sprite):
             if bird.rect.bottom >= 557 and tap == -1:
                 pass
             else:
-                self.rect.y += 2
+                self.rect.y += 3
 
         elif LVL == 3:
             if bird.rect.bottom >= 557 and tap == -1:
                 pass
             else:
                 self.rect.y += 4
+
+
+class Pipe_up(pygame.sprite.Sprite):
+    image = load_image("pipe_up.png")
+    def __init__(self, *group, y_cord=-600):
+        super().__init__(*group)
+        self.image = Pipe_up.image
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.x = 999
+        self.rect.y = y_cord
+
+    def update(self, tap=-1):
+        self.rect.x -= 6
+
+
+class Pipe_down(pygame.sprite.Sprite):
+    image = load_image("pipe_down.png")
+    def __init__(self, *group, y_cord=300):
+        super().__init__(*group)
+        self.image = Pipe_down.image
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.x = 999
+        self.rect.y = y_cord
+
+    def update(self):
+        self.rect.x -= 6
 
 
 class levels:
@@ -452,8 +486,16 @@ class profile:
 
 if __name__ == "__main__":
     clock = pygame.time.Clock()
-    all_sprites = pygame.sprite.Group()
-    bird = Bird(all_sprites)
+
+    bird_sprites = pygame.sprite.Group()
+    bird = Bird(bird_sprites)
+
+    pipe_up_sprites = pygame.sprite.Group()
+    pipe_up = Pipe_up(pipe_up_sprites)
+
+    pipe_down_sprites = pygame.sprite.Group()
+    pipe_down = Pipe_down(pipe_down_sprites)
+
     running = True
     menu(screen)
     while running:
@@ -480,16 +522,23 @@ if __name__ == "__main__":
             elif GAME:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        all_sprites.update(0)
+                        bird_sprites.update(0)
                         game(LVL)
 
         if GAME:
-            all_sprites.update()
+            bird_sprites.update()
+            pipe_up_sprites.update()
+            pipe_down_sprites.update()
+            if pipe_down.rect.x < 500:
+                y_cords = random.randrange(-670, -420)
+                new_pipe_down = Pipe_down(pipe_down_sprites, y_cord=y_cords + 900)
+                pipe_down = new_pipe_down
+                pipe_up = Pipe_up(pipe_up_sprites, y_cord=y_cords)
+
             game(LVL)
 
-
-
         pygame.display.flip()
+
         clock.tick(FPS)
 
     pygame.quit()
