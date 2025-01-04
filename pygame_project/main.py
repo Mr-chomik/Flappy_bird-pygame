@@ -15,14 +15,16 @@ MENU = True
 PROFILE = False
 LEVELS = False
 GAME = False
+GAME_OVER = False
 LOGIN = ""
+PASSWORD = ""
 INPUT_LOGIN = False
 INPUT_PASSWORD = False
 REGISTRATION = False
 TEXT_LOGIN = ""
 TEXT_PASSWORD = ""
 LVL = 1
-SCORE = 0
+SCORE = -1
 
 
 def load_image(name, colorkey=None):
@@ -89,12 +91,55 @@ class menu:
 
 class game:
     def __init__(self, level, width=999, height=558):
+        global SCORE
+
         self.background = load_image("background_" + str(level) + ".jpg")
         self.background_rect = self.background.get_rect(bottomright=(width, height))
+
+        self.render()
+
+    def render(self):
+        screen.fill((0, 0, 0))
+
         screen.blit(self.background, self.background_rect)
+
         bird_sprites.draw(screen)
         pipe_up_sprites.draw(screen)
         pipe_down_sprites.draw(screen)
+
+    def stop(self):
+        global GAME, GAME_OVER, SCORE
+        if pygame.sprite.spritecollideany(bird, pipe_down_sprites) or pygame.sprite.spritecollideany(bird, pipe_up_sprites):
+            GAME = False
+            GAME_OVER = True
+            bird.kill()
+            for sprite in pipe_up_sprites:
+                sprite.kill()
+            for sprite in pipe_down_sprites:
+                sprite.kill()
+
+            game_over(screen)
+
+        if SCORE != -1:
+            font = pygame.font.Font(None, 100)
+            text = font.render(str(SCORE), True, (225, 190, 0))
+            screen.blit(text, (445, 70))
+        else:
+            font = pygame.font.Font(None, 100)
+            text = font.render("0", True, (225, 190, 0))
+            screen.blit(text, (445, 70))
+
+    def to_game_again(self):
+        global bird, bird_sprites, pipe_down_sprites, pipe_up_sprites, pipe_down, pipe_up, LVL
+        bird_sprites = pygame.sprite.Group()
+        bird = Bird(bird_sprites)
+
+        pipe_up_sprites = pygame.sprite.Group()
+        pipe_up = Pipe_up(pipe_up_sprites)
+
+        pipe_down_sprites = pygame.sprite.Group()
+        pipe_down = Pipe_down(pipe_down_sprites)
+        game(LVL)
 
 
 class Bird(pygame.sprite.Sprite):
@@ -108,9 +153,6 @@ class Bird(pygame.sprite.Sprite):
 
     def update(self, tap=-1):
         global LVL
-        print(pygame.sprite.collide_mask(self, pipe_down))
-        if pygame.sprite.collide_mask(self, pipe_down):
-            print(1)
 
         if tap != -1 and bird.rect.top >= 25:
             self.rect.y -= 35
@@ -221,6 +263,18 @@ class levels:
             LVL = 3
             game(3)
 
+    def to_game_again(self):
+        global bird, bird_sprites, pipe_down_sprites, pipe_up_sprites, pipe_down, pipe_up
+        bird_sprites = pygame.sprite.Group()
+        bird = Bird(bird_sprites)
+
+        pipe_up_sprites = pygame.sprite.Group()
+        pipe_up = Pipe_up(pipe_up_sprites)
+
+        pipe_down_sprites = pygame.sprite.Group()
+        pipe_down = Pipe_down(pipe_down_sprites)
+        levels(screen)
+
 
 class profile:
     def __init__(self, screen, width=999, height=558):
@@ -270,7 +324,7 @@ class profile:
             screen.blit(text, (200, 125))
 
             font = pygame.font.Font(None, 50)
-            text = font.render(f"Всего попыток:     {count_of_tries}", True, (230, 230, 230))
+            text = font.render(f"Всего очков:     {count_of_tries}", True, (230, 230, 230))
             screen.blit(text, (80, 240))
 
             text = font.render(f"Рекорд:            {record}", True, (230, 230, 230))
@@ -381,7 +435,7 @@ class profile:
             pygame.draw.rect(screen, (250, 250, 250), (240, 265, 260, 35), 2)
 
     def registration(self, pos):
-        global INPUT_LOGIN, TEXT_LOGIN, INPUT_PASSWORD, TEXT_PASSWORD, PROFILE, MENU, LOGIN
+        global INPUT_LOGIN, TEXT_LOGIN, INPUT_PASSWORD, TEXT_PASSWORD, PROFILE, MENU, LOGIN, PASSWORD
         x, y = pos[0], pos[1]
 
         if x < 620 and x > 350 and y < 365 and y > 325: # кнопка 'Зарегистрироваться'
@@ -407,6 +461,7 @@ class profile:
                             writer.writerow(row)
                         writer.writerow([TEXT_LOGIN.lower(), TEXT_PASSWORD, 0, 0])
                         LOGIN = (TEXT_LOGIN.lower()).capitalize()
+                        PASSWORD = TEXT_PASSWORD
 
                         profile(screen)
                 else:
@@ -446,8 +501,6 @@ class profile:
             pygame.draw.rect(screen, (250, 250, 250), (240, 215, 260, 35), 2)
             pygame.draw.rect(screen, (250, 250, 250), (240, 265, 260, 35), 2)
 
-
-
     def inputting(self, isLogin, isPassword):
         global TEXT_LOGIN, TEXT_PASSWORD
         font = pygame.font.Font(None, 40)
@@ -482,6 +535,67 @@ class profile:
             pygame.draw.rect(screen, (200, 200, 200), (240, 265, 260, 35), 2)
             text = font.render(TEXT_PASSWORD, True, (210, 210, 210))
             screen.blit(text, (245, 270))
+
+
+class game_over:
+    def __init__(self, screen):
+        global LOGIN, SCORE, PASSWORD
+
+        if LOGIN:
+            matrix = []
+            with open('pygame_data.csv', encoding="utf8") as csvfile:
+                reader = csv.reader(csvfile, delimiter=';', quotechar='"')
+                for row in reader:
+                    matrix.append(row)
+
+            with open('pygame_data.csv', 'w', newline="", encoding="utf8") as csvfile:
+                writer = csv.writer(csvfile, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                for row in matrix:
+                    if LOGIN.lower() != row[0]:
+                        writer.writerow(row)
+                    else:
+                        count = int(row[2]) + SCORE
+                        record_new = max(SCORE, int(row[3]))
+                        writer.writerow([LOGIN.lower(), PASSWORD, str(count), str(record_new)])
+
+        SCORE = -1
+        self.render(screen)
+
+    def render(self, screen):
+        surf = pygame.Surface((999, 558))
+        surf.fill("black")
+        surf.set_alpha(80)
+        screen.blit(surf, (0, 0))
+
+        pygame.draw.rect(screen, (160, 82, 50), (400, 160, 200, 60), 0)
+        pygame.draw.rect(screen, (120, 0, 0), (400, 160, 200, 60), 4)
+        pygame.draw.rect(screen, (0, 0, 0), (400, 160, 200, 60), 2)
+        font = pygame.font.Font(None, 50)
+        text = font.render("Заново", True, (215, 215, 215))
+        screen.blit(text, (440, 175))
+
+        pygame.draw.rect(screen, (160, 82, 50), (400, 260, 200, 60), 0)
+        pygame.draw.rect(screen, (120, 0, 0), (400, 260, 200, 60), 4)
+        pygame.draw.rect(screen, (0, 0, 0), (400, 260, 200, 60), 2)
+        font = pygame.font.Font(None, 50)
+        text = font.render("Уровни", True, (215, 215, 215))
+        screen.blit(text, (440, 275))
+
+        pygame.display.update()
+
+    def changes(self, pos):
+        global GAME_OVER, GAME, LEVELS, LVL
+        x, y = pos[0], pos[1]
+
+        if x < 600 and x > 400 and y < 220 and y > 160: # кнопка 'Заново'
+            GAME_OVER = False
+            GAME = True
+            game.to_game_again(screen)
+
+        elif x < 600 and x > 400 and y < 320 and y > 260: # кнопка 'Уровни'
+            GAME_OVER = False
+            LEVELS = True
+            levels.to_game_again(screen)
 
 
 if __name__ == "__main__":
@@ -525,17 +639,33 @@ if __name__ == "__main__":
                         bird_sprites.update(0)
                         game(LVL)
 
+            elif GAME_OVER:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    game_over.changes(screen, event.pos)
+
         if GAME:
             bird_sprites.update()
             pipe_up_sprites.update()
             pipe_down_sprites.update()
             if pipe_down.rect.x < 500:
                 y_cords = random.randrange(-670, -420)
-                new_pipe_down = Pipe_down(pipe_down_sprites, y_cord=y_cords + 900)
-                pipe_down = new_pipe_down
+                pipe_down = Pipe_down(pipe_down_sprites, y_cord=y_cords + 900)
                 pipe_up = Pipe_up(pipe_up_sprites, y_cord=y_cords)
 
+            if len(pipe_down_sprites) > 3:
+                for index, sprite in enumerate(pipe_down_sprites):
+                    if index < len(pipe_down_sprites) - 3:
+                        sprite.kill()
+
+                for index, sprite in enumerate(pipe_up_sprites):
+                    if index < len(pipe_up_sprites) - 3:
+                        sprite.kill()
+
+            if pipe_down.rect.x > 600 and pipe_down.rect.x < 606:
+                SCORE += 1
+
             game(LVL)
+            game.stop(screen)
 
         pygame.display.flip()
 
