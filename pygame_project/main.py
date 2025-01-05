@@ -25,6 +25,7 @@ TEXT_LOGIN = ""
 TEXT_PASSWORD = ""
 LVL = 1
 SCORE = -1
+ACCES = "00"
 
 
 def load_image(name, colorkey=None):
@@ -73,6 +74,10 @@ class menu:
             font = pygame.font.Font(None, 50)
             text = font.render("?", True, (30, 30, 30))
             screen.blit(text, (957, 17))
+
+            font = pygame.font.Font(None, 30)
+            text = font.render("Профиль -->", True, (100, 100, 100))
+            screen.blit(text, (800, 25))
 
     def changes(self, pos):
         global MENU, LEVELS, PROFILE
@@ -123,11 +128,11 @@ class game:
         if SCORE != -1:
             font = pygame.font.Font(None, 100)
             text = font.render(str(SCORE), True, (225, 190, 0))
-            screen.blit(text, (445, 70))
+            screen.blit(text, (475, 70))
         else:
             font = pygame.font.Font(None, 100)
             text = font.render("0", True, (225, 190, 0))
-            screen.blit(text, (445, 70))
+            screen.blit(text, (475, 70))
 
     def to_game_again(self):
         global bird, bird_sprites, pipe_down_sprites, pipe_up_sprites, pipe_down, pipe_up, LVL
@@ -220,6 +225,8 @@ class levels:
         self.render()
 
     def render(self):
+        global LOGIN, ACCES
+
         screen.fill((0, 0, 0))
 
         screen.blit(self.background_3, self.background_rect_3)
@@ -237,8 +244,103 @@ class levels:
         text = font.render("<", True, (0, 0, 0))
         screen.blit(text, (21, 13))
 
+        if LOGIN:
+            count_of_tries = 0
+            with open('pygame_data.csv', encoding="utf8") as csvfile:
+                reader = csv.reader(csvfile, delimiter=';', quotechar='"')
+                for row in reader:
+                    if LOGIN.lower() == row[0]:
+                        count_of_tries = row[2]
+                        break
+
+            if int(count_of_tries) >= 80:
+                ACCES = "11"
+
+            elif int(count_of_tries) >= 40:
+                ACCES = "10"
+
+            if ACCES[0] == "0":
+                surf = pygame.Surface((666, 558))
+                surf.fill("black")
+                surf.set_alpha(140)
+                screen.blit(surf, (333, 0))
+
+                pygame.draw.ellipse(screen, (150, 150, 150), (485, 265, 40, 50), 4)
+                pygame.draw.ellipse(screen, (100, 100, 100), (480, 280, 50, 50))
+                pygame.draw.polygon(screen, (180, 180, 0), [(505, 298), (510, 315), (500, 315)])
+                pygame.draw.ellipse(screen, (180, 180, 0), (500, 292, 10, 10))
+
+                pygame.draw.ellipse(screen, (150, 150, 150), (815, 265, 40, 50), 4)
+                pygame.draw.ellipse(screen, (100, 100, 100), (810, 280, 50, 50))
+                pygame.draw.polygon(screen, (180, 180, 0), [(835, 298), (840, 315), (830, 315)])
+                pygame.draw.ellipse(screen, (180, 180, 0), (830, 292, 10, 10))
+
+                font = pygame.font.Font(None, 25)
+                text = font.render("Наберите еще очков", True, (170, 170, 170))
+                screen.blit(text, (420, 440))
+                text = font.render("чтобы получить доступ к уровню", True, (170, 170, 170))
+                screen.blit(text, (360, 470))
+                text = font.render(f"у вас {count_of_tries}/40", True, (170, 170, 170))
+                screen.blit(text, (460, 360))
+
+                text = font.render("Наберите еще очков", True, (170, 170, 170))
+                screen.blit(text, (750, 440))
+                text = font.render("чтобы получить доступ к уровню", True, (170, 170, 170))
+                screen.blit(text, (690, 470))
+                text = font.render(f"у вас {count_of_tries}/80", True, (170, 170, 170))
+                screen.blit(text, (790, 360))
+
+            elif ACCES[1] == "0":
+                surf = pygame.Surface((333, 558))
+                surf.fill("black")
+                surf.set_alpha(140)
+                screen.blit(surf, (666, 0))
+
+                pygame.draw.ellipse(screen, (150, 150, 150), (815, 265, 40, 50), 4)
+                pygame.draw.ellipse(screen, (100, 100, 100), (810, 280, 50, 50))
+                pygame.draw.polygon(screen, (180, 180, 0), [(835, 298), (840, 315), (830, 315)])
+                pygame.draw.ellipse(screen, (180, 180, 0), (830, 292, 10, 10))
+
+                font = pygame.font.Font(None, 25)
+                text = font.render("Наберите еще очков", True, (170, 170, 170))
+                screen.blit(text, (750, 440))
+                text = font.render("чтобы получить доступ к уровню", True, (170, 170, 170))
+                screen.blit(text, (690, 470))
+                text = font.render(f"у вас {count_of_tries}/80", True, (170, 170, 170))
+                screen.blit(text, (790, 360))
+
+        else:
+            surf = pygame.Surface((666, 558))
+            surf.fill("black")
+            surf.set_alpha(140)
+            screen.blit(surf, (333, 0))
+
+            pygame.draw.ellipse(screen, (150, 150, 150), (485, 265, 40, 50), 4)
+            pygame.draw.ellipse(screen, (100, 100, 100), (480, 280, 50, 50))
+            pygame.draw.polygon(screen, (180, 180, 0), [(505, 298), (510, 315), (500, 315)])
+            pygame.draw.ellipse(screen, (180, 180, 0), (500, 292, 10, 10))
+
+            pygame.draw.ellipse(screen, (150, 150, 150), (815, 265, 40, 50), 4)
+            pygame.draw.ellipse(screen, (100, 100, 100), (810, 280, 50, 50))
+            pygame.draw.polygon(screen, (180, 180, 0), [(835, 298), (840, 315), (830, 315)])
+            pygame.draw.ellipse(screen, (180, 180, 0), (830, 292, 10, 10))
+
+            font = pygame.font.Font(None, 25)
+            text = font.render("Войдите в аккаунт", True, (170, 170, 170))
+            screen.blit(text, (420, 440))
+            font = pygame.font.Font(None, 25)
+            text = font.render("чтобы получить доступ к уровню", True, (170, 170, 170))
+            screen.blit(text, (360, 470))
+
+            text = font.render("Войдите в аккаунт", True, (170, 170, 170))
+            screen.blit(text, (750, 440))
+            font = pygame.font.Font(None, 25)
+            text = font.render("чтобы получить доступ к уровню", True, (170, 170, 170))
+            screen.blit(text, (690, 470))
+
     def changes(self, pos):
-        global MENU, LEVELS, PROFILE, GAME, LVL
+        global MENU, LEVELS, PROFILE, GAME, LVL, ACCES
+
         x, y = pos[0], pos[1]
         if x < 55 and y < 55:
             LEVELS = False
@@ -251,13 +353,13 @@ class levels:
             LVL = 1
             game(1)
 
-        elif x > 333 and x < 666:
+        elif x > 333 and x < 666 and ACCES[0] == "1":
             LEVELS = False
             GAME = True
             LVL = 2
             game(2)
 
-        elif x > 666:
+        elif x > 666 and ACCES[1] == "1":
             LEVELS = False
             GAME = True
             LVL = 3
@@ -342,12 +444,10 @@ class profile:
             font = pygame.font.Font(None, 50)
             text = font.render("Логин:", True, (230, 230, 230))
             screen.blit(text, (80, 215))
-
             pygame.draw.rect(screen, (250, 250, 250), (240, 215, 260, 35), 2)
 
             text = font.render("Пароль:", True, (230, 230, 230))
             screen.blit(text, (80, 265))
-
             pygame.draw.rect(screen, (250, 250, 250), (240, 265, 260, 35), 2)
 
             pygame.draw.rect(screen, (200, 122, 90), (465, 325, 110, 40))
@@ -365,7 +465,7 @@ class profile:
             screen.blit(text, (314, 424))
 
     def changes(self, pos):
-        global INPUT_LOGIN, INPUT_PASSWORD, MENU, PROFILE, TEXT_LOGIN, TEXT_PASSWORD, LOGIN, REGISTRATION
+        global INPUT_LOGIN, INPUT_PASSWORD, MENU, PROFILE, TEXT_LOGIN, TEXT_PASSWORD, LOGIN, REGISTRATION, PASSWORD
         x, y = pos[0], pos[1]
         REGISTRATION = False
 
@@ -378,7 +478,7 @@ class profile:
             MENU = True
             menu(screen)
 
-        elif x < 500 and x > 240 and y < 250 and y > 215: # поле ввода логина
+        elif x < 500 and x > 240 and y < 250 and y > 215 and not LOGIN: # поле ввода логина
             INPUT_LOGIN = True
             INPUT_PASSWORD = False
 
@@ -386,7 +486,7 @@ class profile:
             pygame.draw.rect(screen, (250, 250, 250), (240, 265, 260, 35), 2)
             pygame.draw.rect(screen, (160, 82, 50), (200, 180, 300, 25), 0)
 
-        elif x < 500 and x > 240 and y < 300 and y > 265: # поле ввода пароля
+        elif x < 500 and x > 240 and y < 300 and y > 265 and not LOGIN: # поле ввода пароля
             INPUT_PASSWORD = True
             INPUT_LOGIN = False
 
@@ -394,7 +494,7 @@ class profile:
             pygame.draw.rect(screen, (200, 200, 200), (240, 265, 260, 35), 2)
             pygame.draw.rect(screen, (160, 82, 50), (200, 180, 300, 25), 0)
 
-        elif x < 580 and x > 300 and y < 460 and y > 415: # кнопка 'Зарегистрироваться'
+        elif x < 580 and x > 300 and y < 460 and y > 415 and not LOGIN: # кнопка 'Зарегистрироваться'
             REGISTRATION = True
             TEXT_LOGIN = ""
             TEXT_PASSWORD = ""
@@ -415,19 +515,22 @@ class profile:
 
             profile.inputting(screen, False, False)  # registration
 
-        elif x < 575 and x > 465 and y < 360 and y > 320 and not REGISTRATION: # 'Войти'
+        elif x < 575 and x > 465 and y < 360 and y > 320 and not REGISTRATION and not LOGIN: # кнопка 'Войти'
             with open('pygame_data.csv', encoding="utf8") as csvfile:
                 reader = csv.reader(csvfile, delimiter=';', quotechar='"')
                 for row in reader:
                     if TEXT_LOGIN.lower() == row[0] and TEXT_PASSWORD == row[1]:
                         LOGIN = (TEXT_LOGIN.lower()).capitalize()
+                        PASSWORD = TEXT_PASSWORD
                         profile(screen)
+                        break
                     else:
                         font = pygame.font.Font(None, 30)
                         text = font.render("Неверный логин или пароль", True, (180, 10, 10))
                         screen.blit(text, (220, 185))
+                        continue
 
-        else:
+        elif not LOGIN:
             INPUT_LOGIN = False
             INPUT_PASSWORD = False
 
@@ -438,7 +541,7 @@ class profile:
         global INPUT_LOGIN, TEXT_LOGIN, INPUT_PASSWORD, TEXT_PASSWORD, PROFILE, MENU, LOGIN, PASSWORD
         x, y = pos[0], pos[1]
 
-        if x < 620 and x > 350 and y < 365 and y > 325: # кнопка 'Зарегистрироваться'
+        if x < 620 and x > 350 and y < 365 and y > 325 and not LOGIN: # кнопка 'Зарегистрироваться'
             if TEXT_LOGIN == "" or len(TEXT_PASSWORD) < 4 or TEXT_LOGIN.lower() == "login" or TEXT_PASSWORD.lower() == "password":
                 font = pygame.font.Font(None, 30)
                 text = font.render("Неверный логин или пароль", True, (180, 10, 10))
@@ -479,14 +582,14 @@ class profile:
             menu(screen)
 
 
-        elif x < 500 and x > 240 and y < 300 and y > 265:  # поле ввода пароля
+        elif x < 500 and x > 240 and y < 300 and y > 265 and not LOGIN:  # поле ввода пароля
             INPUT_PASSWORD = True
             INPUT_LOGIN = False
             pygame.draw.rect(screen, (250, 250, 250), (240, 215, 260, 35), 2)
             pygame.draw.rect(screen, (200, 200, 200), (240, 265, 260, 35), 2)
             pygame.draw.rect(screen, (160, 82, 50), (200, 180, 300, 25), 0)
 
-        elif x < 500 and x > 240 and y < 250 and y > 215: # поле ввода логина
+        elif x < 500 and x > 240 and y < 250 and y > 215 and not LOGIN: # поле ввода логина
             INPUT_LOGIN = True
             INPUT_PASSWORD = False
 
@@ -494,7 +597,7 @@ class profile:
             pygame.draw.rect(screen, (250, 250, 250), (240, 265, 260, 35), 2)
             pygame.draw.rect(screen, (160, 82, 50), (200, 180, 300, 25), 0)
 
-        else:
+        elif not LOGIN:
             INPUT_LOGIN = False
             INPUT_PASSWORD = False
 
