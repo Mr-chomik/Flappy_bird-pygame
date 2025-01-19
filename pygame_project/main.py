@@ -45,7 +45,7 @@ def load_image(name, colorkey=None):
     return image
 
 
-class menu:
+class Menu:
     def __init__(self, screen, width=999, height=558):
         self.background = load_image("background_menu.jpg")
         self.background_rect = self.background.get_rect(bottomright=(width, height))
@@ -53,6 +53,7 @@ class menu:
 
     def render(self):
         global LOGIN
+        pygame.mouse.set_visible(True)
         screen.fill((0, 0, 0))
 
         screen.blit(self.background, self.background_rect)
@@ -86,15 +87,15 @@ class menu:
         if x >= 350 and x <= 650 and y >= 200 and y <= 260:
             MENU = False
             LEVELS = True
-            levels(screen)
+            Levels(screen)
 
         elif x >= 945 and x <= 990 and y >= 10 and y <= 55:
             MENU = False
             PROFILE = True
-            profile(screen)
+            Profile(screen)
 
 
-class game:
+class Game:
     def __init__(self, level, width=999, height=558):
         global SCORE
 
@@ -104,6 +105,7 @@ class game:
         self.render()
 
     def render(self):
+        pygame.mouse.set_visible(False)
         screen.fill((0, 0, 0))
 
         screen.blit(self.background, self.background_rect)
@@ -123,7 +125,7 @@ class game:
             for sprite in pipe_down_sprites:
                 sprite.kill()
 
-            game_over(screen)
+            Game_over(screen)
 
         if SCORE != -1:
             font = pygame.font.Font(None, 100)
@@ -144,7 +146,7 @@ class game:
 
         pipe_down_sprites = pygame.sprite.Group()
         pipe_down = Pipe_down(pipe_down_sprites)
-        game(LVL)
+        Game(LVL)
 
 
 class Bird(pygame.sprite.Sprite):
@@ -168,7 +170,7 @@ class Bird(pygame.sprite.Sprite):
             if bird.rect.bottom >= 557 and tap == -1:
                 pass
             else:
-                self.rect.y += 3
+                self.rect.y += random.randint(3, 4)
 
         elif LVL == 2:
             if bird.rect.bottom >= 557 and tap == -1:
@@ -180,7 +182,7 @@ class Bird(pygame.sprite.Sprite):
             if bird.rect.bottom >= 557 and tap == -1:
                 pass
             else:
-                self.rect.y += 4
+                self.rect.y += 3
 
 
 class Pipe_up(pygame.sprite.Sprite):
@@ -211,7 +213,7 @@ class Pipe_down(pygame.sprite.Sprite):
         self.rect.x -= 6
 
 
-class levels:
+class Levels:
     def __init__(self, screen, width=999, height=558):
         self.background_3 = load_image("min_background_3.jpg")
         self.background_rect_3 = self.background_3.get_rect(bottomright=(width, height))
@@ -226,7 +228,7 @@ class levels:
 
     def render(self):
         global LOGIN, ACCES
-
+        pygame.mouse.set_visible(True)
         screen.fill((0, 0, 0))
 
         screen.blit(self.background_3, self.background_rect_3)
@@ -345,25 +347,25 @@ class levels:
         if x < 55 and y < 55:
             LEVELS = False
             MENU = True
-            menu(screen)
+            Menu(screen)
 
         elif x < 333:
             LEVELS = False
             GAME = True
             LVL = 1
-            game(1)
+            Game(1)
 
         elif x > 333 and x < 666 and ACCES[0] == "1":
             LEVELS = False
             GAME = True
             LVL = 2
-            game(2)
+            Game(2)
 
         elif x > 666 and ACCES[1] == "1":
             LEVELS = False
             GAME = True
             LVL = 3
-            game(3)
+            Game(3)
 
     def to_game_again(self):
         global bird, bird_sprites, pipe_down_sprites, pipe_up_sprites, pipe_down, pipe_up
@@ -375,10 +377,10 @@ class levels:
 
         pipe_down_sprites = pygame.sprite.Group()
         pipe_down = Pipe_down(pipe_down_sprites)
-        levels(screen)
+        Levels(screen)
 
 
-class profile:
+class Profile:
     def __init__(self, screen, width=999, height=558):
         self.background = load_image("background_profile.jpg")
         self.background_rect = self.background.get_rect(bottomright=(width, height))
@@ -387,6 +389,7 @@ class profile:
 
     def render(self):
         global LOGIN, input_box_log, input_box_pas
+        pygame.mouse.set_visible(True)
         screen.fill((0, 0, 0))
 
         screen.blit(self.background, self.background_rect)
@@ -476,7 +479,7 @@ class profile:
             TEXT_PASSWORD = ""
             PROFILE = False
             MENU = True
-            menu(screen)
+            Menu(screen)
 
         elif x < 500 and x > 240 and y < 250 and y > 215 and not LOGIN: # поле ввода логина
             INPUT_LOGIN = True
@@ -513,7 +516,7 @@ class profile:
             text = font.render("Зарегистрироваться", True, (230, 230, 230))
             screen.blit(text, (363, 332))
 
-            profile.inputting(screen, False, False)  # registration
+            Profile.inputting(screen, False, False)  # registration
 
         elif x < 575 and x > 465 and y < 360 and y > 320 and not REGISTRATION and not LOGIN: # кнопка 'Войти'
             with open('pygame_data.csv', encoding="utf8") as csvfile:
@@ -522,7 +525,7 @@ class profile:
                     if TEXT_LOGIN.lower() == row[0] and TEXT_PASSWORD == row[1]:
                         LOGIN = (TEXT_LOGIN.lower()).capitalize()
                         PASSWORD = TEXT_PASSWORD
-                        profile(screen)
+                        Profile(screen)
                         break
                     else:
                         font = pygame.font.Font(None, 30)
@@ -566,7 +569,7 @@ class profile:
                         LOGIN = (TEXT_LOGIN.lower()).capitalize()
                         PASSWORD = TEXT_PASSWORD
 
-                        profile(screen)
+                        Profile(screen)
                 else:
                     font = pygame.font.Font(None, 30)
                     text = font.render("Этот логин занят", True, (180, 10, 10))
@@ -579,7 +582,7 @@ class profile:
             TEXT_PASSWORD = ""
             PROFILE = False
             MENU = True
-            menu(screen)
+            Menu(screen)
 
 
         elif x < 500 and x > 240 and y < 300 and y > 265 and not LOGIN:  # поле ввода пароля
@@ -640,7 +643,7 @@ class profile:
             screen.blit(text, (245, 270))
 
 
-class game_over:
+class Game_over:
     def __init__(self, screen):
         global LOGIN, SCORE, PASSWORD
 
@@ -665,6 +668,7 @@ class game_over:
         self.render(screen)
 
     def render(self, screen):
+        pygame.mouse.set_visible(True)
         surf = pygame.Surface((999, 558))
         surf.fill("black")
         surf.set_alpha(80)
@@ -693,12 +697,12 @@ class game_over:
         if x < 600 and x > 400 and y < 220 and y > 160: # кнопка 'Заново'
             GAME_OVER = False
             GAME = True
-            game.to_game_again(screen)
+            Game.to_game_again(screen)
 
         elif x < 600 and x > 400 and y < 320 and y > 260: # кнопка 'Уровни'
             GAME_OVER = False
             LEVELS = True
-            levels.to_game_again(screen)
+            Levels.to_game_again(screen)
 
 
 if __name__ == "__main__":
@@ -714,7 +718,7 @@ if __name__ == "__main__":
     pipe_down = Pipe_down(pipe_down_sprites)
 
     running = True
-    menu(screen)
+    Menu(screen)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -722,29 +726,29 @@ if __name__ == "__main__":
 
             if MENU:
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    menu.changes(screen, event.pos)
+                    Menu.changes(screen, event.pos)
 
             elif LEVELS:
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    levels.changes(screen, event.pos)
+                    Levels.changes(screen, event.pos)
 
             elif PROFILE:
                 if event.type == pygame.MOUSEBUTTONDOWN and REGISTRATION:
-                    profile.registration(screen, event.pos)
+                    Profile.registration(screen, event.pos)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    profile.changes(screen, event.pos)
+                    Profile.changes(screen, event.pos)
                 if (INPUT_PASSWORD or INPUT_LOGIN) and event.type == pygame.KEYDOWN:
-                    profile.inputting(screen, INPUT_LOGIN, INPUT_PASSWORD)
+                    Profile.inputting(screen, INPUT_LOGIN, INPUT_PASSWORD)
 
             elif GAME:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         bird_sprites.update(0)
-                        game(LVL)
+                        Game(LVL)
 
             elif GAME_OVER:
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    game_over.changes(screen, event.pos)
+                    Game_over.changes(screen, event.pos)
 
         if GAME:
             bird_sprites.update()
@@ -767,8 +771,8 @@ if __name__ == "__main__":
             if pipe_down.rect.x > 600 and pipe_down.rect.x < 606:
                 SCORE += 1
 
-            game(LVL)
-            game.stop(screen)
+            Game(LVL)
+            Game.stop(screen)
 
         pygame.display.flip()
 
