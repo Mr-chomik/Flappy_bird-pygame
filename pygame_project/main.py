@@ -38,8 +38,8 @@ def load_image(name, colorkey=None):
     if colorkey is not None:
         image = image.convert()
         if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
+            first_pixel = image.get_at((0, 0))
+        image.set_colorkey(first_pixel)
     else:
         image = image.convert_alpha()
     return image
