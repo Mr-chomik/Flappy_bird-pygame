@@ -10,7 +10,7 @@ screen = pygame.display.set_mode(size)
 COLORS = [(244, 164, 96), (255, 160, 122), (221, 160, 221), (107, 142, 35), (65, 105, 225)]
 
 COLOR = choice(COLORS)
-FPS = 30
+FPS = 60
 MENU = True
 PROFILE = False
 LEVELS = False
@@ -705,6 +705,28 @@ class Game_over:
             Levels.to_game_again(screen)
 
 
+def start_screen():
+    fon = pygame.transform.scale(load_image('background_loading.jpg'), (999, 558))
+    screen.blit(fon, (0, 0))
+
+    font = pygame.font.Font(None, 80)
+    text = font.render("Flappy bird", True, (105, 145, 105))
+    screen.blit(text, (320, 75))
+
+    font = pygame.font.Font(None, 40)
+    text = font.render("Нажмите любую кнопку, чтобы начать", True, (170, 170, 170))
+    screen.blit(text, (250, 500))
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                return
+        pygame.display.flip()
+
+
 if __name__ == "__main__":
     clock = pygame.time.Clock()
 
@@ -718,6 +740,7 @@ if __name__ == "__main__":
     pipe_down = Pipe_down(pipe_down_sprites)
 
     running = True
+    start_screen()
     Menu(screen)
     while running:
         for event in pygame.event.get():
