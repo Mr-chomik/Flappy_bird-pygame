@@ -11,6 +11,7 @@ COLORS = [(244, 164, 96), (255, 160, 122), (221, 160, 221), (107, 142, 35), (65,
 
 COLOR = choice(COLORS)
 FPS = 60
+GRAVITY = 0.25
 MENU = True
 PROFILE = False
 LEVELS = False
@@ -703,6 +704,41 @@ class Game_over:
             GAME_OVER = False
             LEVELS = True
             Levels.to_game_again(screen)
+        else:
+            create_particles(pygame.mouse.get_pos())
+
+
+screen_rect = (0, 0, width, height)
+particle_sprite = pygame.sprite.Group()
+
+
+class Particle(pygame.sprite.Sprite):
+    leave = [pygame.transform.scale(load_image("leave.png"), (30, 50))]
+    for scale in (50, 30, 20):
+        leave.append(pygame.transform.scale(leave[0], (int(scale / 1.35), scale)))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__(particle_sprite)
+        self.image = random.choice(self.leave)
+        self.rect = self.image.get_rect()
+
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+
+        self.gravity = GRAVITY
+
+    def update(self):
+        self.velocity[1] += self.gravity
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if self.rect.y > 558:
+            self.kill()
+
+
+def create_particles(pos):
+    vs = range(-5, 5)
+    for _ in range(15):
+        Particle(pos, random.choice(vs), random.choice(vs))
 
 
 def start_screen():
@@ -714,20 +750,12 @@ def start_screen():
     screen.blit(text, (320, 75))
 
     font = pygame.font.Font(None, 40)
-    text = font.render("Нажмите любую кнопку, чтобы начать", True, (170, 170, 170))
+    text = font.render("Нажмите пробел, чтобы начать", True, (170, 170, 170))
     screen.blit(text, (250, 500))
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                return
-        pygame.display.flip()
 
 
 if __name__ == "__main__":
+    main_game = True
     clock = pygame.time.Clock()
 
     bird_sprites = pygame.sprite.Group()
@@ -741,11 +769,30 @@ if __name__ == "__main__":
 
     running = True
     start_screen()
-    Menu(screen)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                main_game = False
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                create_particles(pygame.mouse.get_pos())
+
+        start_screen()
+        particle_sprite.draw(screen)
+        particle_sprite.update()
+        pygame.display.flip()
+
+    if main_game:
+       Menu(screen)
+    while main_game:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                main_game = False
 
             if MENU:
                 if event.type == pygame.MOUSEBUTTONDOWN:
