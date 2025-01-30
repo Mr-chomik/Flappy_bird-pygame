@@ -14,7 +14,7 @@ leaves_sound.set_volume(0.2)
 COLORS = [(244, 164, 96), (255, 160, 122), (221, 160, 221), (107, 142, 35), (65, 105, 225)]
 
 COLOR = choice(COLORS)
-FPS = 60
+FPS = 30
 GRAVITY = 0.25
 MENU = True
 PROFILE = False
