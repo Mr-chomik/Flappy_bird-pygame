@@ -6,7 +6,11 @@ pygame.init()
 size = width, height = 999, 558
 screen = pygame.display.set_mode(size)
 
+button_sound = pygame.mixer.Sound(os.path.join('data', 'push_button.mp3'))
+button_sound.set_volume(0.2)
 
+leaves_sound = pygame.mixer.Sound(os.path.join('data', 'leaves.mp3'))
+leaves_sound.set_volume(0.2)
 COLORS = [(244, 164, 96), (255, 160, 122), (221, 160, 221), (107, 142, 35), (65, 105, 225)]
 
 COLOR = choice(COLORS)
@@ -27,6 +31,7 @@ TEXT_PASSWORD = ""
 LVL = 1
 SCORE = -1
 ACCES = "00"
+MUSIC = "menu"
 
 
 def load_image(name, colorkey=None):
@@ -53,7 +58,14 @@ class Menu:
         self.render()
 
     def render(self):
-        global LOGIN
+        global LOGIN, MUSIC
+
+        if MUSIC == "game":
+            MUSIC = "menu"
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load(os.path.join('data', 'Background_music.mp3'))
+            pygame.mixer.music.play(-1)
+
         pygame.mouse.set_visible(True)
         screen.fill((0, 0, 0))
 
@@ -88,11 +100,13 @@ class Menu:
         if x >= 350 and x <= 650 and y >= 200 and y <= 260:
             MENU = False
             LEVELS = True
+            button_sound.play()
             Levels(screen)
 
         elif x >= 945 and x <= 990 and y >= 10 and y <= 55:
             MENU = False
             PROFILE = True
+            button_sound.play()
             Profile(screen)
 
 
@@ -106,6 +120,13 @@ class Game:
         self.render()
 
     def render(self):
+        global MUSIC
+        if MUSIC == "menu":
+            MUSIC = "game"
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load(os.path.join('data', 'Background_game.mp3'))
+            pygame.mixer.music.play(-1)
+
         pygame.mouse.set_visible(False)
         screen.fill((0, 0, 0))
 
@@ -228,7 +249,14 @@ class Levels:
         self.render()
 
     def render(self):
-        global LOGIN, ACCES
+        global LOGIN, ACCES, MUSIC
+
+        if MUSIC == "game":
+            MUSIC = "menu"
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load(os.path.join('data', 'Background_music.mp3'))
+            pygame.mixer.music.play(-1)
+
         pygame.mouse.set_visible(True)
         screen.fill((0, 0, 0))
 
@@ -348,24 +376,28 @@ class Levels:
         if x < 55 and y < 55:
             LEVELS = False
             MENU = True
+            button_sound.play()
             Menu(screen)
 
         elif x < 333:
             LEVELS = False
             GAME = True
             LVL = 1
+            button_sound.play()
             Game(1)
 
         elif x > 333 and x < 666 and ACCES[0] == "1":
             LEVELS = False
             GAME = True
             LVL = 2
+            button_sound.play()
             Game(2)
 
         elif x > 666 and ACCES[1] == "1":
             LEVELS = False
             GAME = True
             LVL = 3
+            button_sound.play()
             Game(3)
 
     def to_game_again(self):
@@ -389,7 +421,14 @@ class Profile:
         self.render()
 
     def render(self):
-        global LOGIN, input_box_log, input_box_pas
+        global LOGIN, input_box_log, input_box_pas, MUSIC
+
+        if MUSIC == "game":
+            MUSIC = "menu"
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load(os.path.join('data', 'Background_music.mp3'))
+            pygame.mixer.music.play(-1)
+
         pygame.mouse.set_visible(True)
         screen.fill((0, 0, 0))
 
@@ -480,6 +519,7 @@ class Profile:
             TEXT_PASSWORD = ""
             PROFILE = False
             MENU = True
+            button_sound.play()
             Menu(screen)
 
         elif x < 500 and x > 240 and y < 250 and y > 215 and not LOGIN: # поле ввода логина
@@ -516,6 +556,7 @@ class Profile:
             font = pygame.font.Font(None, 35)
             text = font.render("Зарегистрироваться", True, (230, 230, 230))
             screen.blit(text, (363, 332))
+            button_sound.play()
 
             Profile.inputting(screen, False, False)  # registration
 
@@ -533,6 +574,7 @@ class Profile:
                         text = font.render("Неверный логин или пароль", True, (180, 10, 10))
                         screen.blit(text, (220, 185))
                         continue
+            button_sound.play()
 
         elif not LOGIN:
             INPUT_LOGIN = False
@@ -669,6 +711,14 @@ class Game_over:
         self.render(screen)
 
     def render(self, screen):
+        global MUSIC
+
+        if MUSIC == "game":
+            MUSIC = "menu"
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load(os.path.join('data', 'Background_music.mp3'))
+            pygame.mixer.music.play(-1)
+
         pygame.mouse.set_visible(True)
         surf = pygame.Surface((999, 558))
         surf.fill("black")
@@ -698,14 +748,14 @@ class Game_over:
         if x < 600 and x > 400 and y < 220 and y > 160: # кнопка 'Заново'
             GAME_OVER = False
             GAME = True
+            button_sound.play()
             Game.to_game_again(screen)
 
         elif x < 600 and x > 400 and y < 320 and y > 260: # кнопка 'Уровни'
             GAME_OVER = False
             LEVELS = True
+            button_sound.play()
             Levels.to_game_again(screen)
-        else:
-            create_particles(pygame.mouse.get_pos())
 
 
 screen_rect = (0, 0, width, height)
@@ -769,6 +819,9 @@ if __name__ == "__main__":
 
     running = True
     start_screen()
+    pygame.mixer.music.load(os.path.join('data', 'birds.mp3'))
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0.1)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -781,6 +834,7 @@ if __name__ == "__main__":
                     running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 create_particles(pygame.mouse.get_pos())
+                leaves_sound.play()
 
         start_screen()
         particle_sprite.draw(screen)
@@ -789,6 +843,11 @@ if __name__ == "__main__":
 
     if main_game:
        Menu(screen)
+       pygame.mixer.music.stop()
+       pygame.mixer.music.load(os.path.join('data', 'Background_music.mp3'))
+       pygame.mixer.music.play(-1)
+       pygame.mixer.music.set_volume(0.1)
+
     while main_game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
